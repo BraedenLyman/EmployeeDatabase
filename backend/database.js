@@ -1,3 +1,8 @@
+/**
+ * "StAuth10244: I Braeden Lyman, 000370695 certify that this material is my original work. 
+ *  No other person's work has been used without due acknowledgement. 
+ *  I have not made my work available to anyone else."
+ */
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('employee.db');
 

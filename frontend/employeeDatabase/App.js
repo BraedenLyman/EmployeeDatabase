@@ -1,10 +1,15 @@
+/**
+ * "StAuth10244: I Braeden Lyman, 000370695 certify that this material is my original work. 
+ *  No other person's work has been used without due acknowledgement. 
+ *  I have not made my work available to anyone else."
+ */
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, TouchableWithoutFeedback, Keyboard, Alert, Modal } from 'react-native';
 import { DataTable, RadioButton } from 'react-native-paper';
 import axios from 'axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const API_URL = 'http://10.0.2.2:3001/api';
+const API_URL = 'http://localhost:3001/api';
 
 export default function App() {
   const [employee, setEmployees] = useState([]);
@@ -23,7 +28,7 @@ export default function App() {
   const fetchEmployees = async () => {
     try {
       const response = await axios.get(API_URL);
-      setEmployees(response.data);
+      setEmployees(response.data || []);
     } catch (error) {
       console.error('Error fetching employees:', error);
     }
@@ -49,12 +54,25 @@ export default function App() {
 
   // DELETE - delete entire collection
   const deleteCollection = async () => {
-    try {
-      await axios.delete(API_URL);
-      fetchEmployees();
-    } catch (error) {
-      console.error('Error deleting entire collection:', error);
-    }
+    Alert.alert(
+      'Confirmation',
+      'Are you sure you want to delete all employees?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Proceed', 
+          onPress: async () => {
+            try {
+              await axios.delete(API_URL);
+              fetchEmployees();
+            } catch (error) {
+              console.error('Error deleting entire collection:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   /**
@@ -123,7 +141,6 @@ export default function App() {
       <ScrollView style={styles.scrollView} >
         <View style={styles.container}>
           <Text style={styles.title}>Employee Manager</Text>
-        
           <View style={styles.tableContainer}>
             <DataTable>
               <DataTable.Header style={styles.head}>
@@ -136,9 +153,9 @@ export default function App() {
                 <DataTable.Cell>View</DataTable.Cell>
               </DataTable.Header>
             </DataTable>
-            
             <ScrollView style={styles.scrollViewRow} >
-              {employee.map((emp) => (
+              {employee && employee.length > 0 ? (
+              employee.map((emp) => (
                 <DataTable.Row key={emp.id} style={styles.row}>
                   <DataTable.Cell>{emp.id}</DataTable.Cell>
                   <DataTable.Cell>{emp.fName}</DataTable.Cell>
@@ -156,10 +173,12 @@ export default function App() {
                     </TouchableOpacity>
                   </DataTable.Cell>
                 </DataTable.Row>
-              ))}
+              ))
+            ): (
+              <Text style={styles.notFoundText}>No employees found.</Text>
+            )}
             </ScrollView>
           </View>
-        
           <View style={styles.inputContainer}>
             <TextInput 
               placeholder='First Name (John)' 
@@ -205,13 +224,7 @@ export default function App() {
               </TouchableOpacity>
             </View>
           </View>
-
-          <Modal
-              visible={isModalVisible}
-              transparent={true}
-              animationType="slide"
-              onRequestClose={closeModal}
-          >
+          <Modal visible={isModalVisible} transparent={true} animationType="slide" onRequestClose={closeModal}>
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 {selectedEmployee && (
@@ -241,7 +254,6 @@ export default function App() {
                           style={styles.modalInput} 
                         />
                       </View>
-                    
                       <View style={styles.modalView}>
                         <Text style={styles.modalText}>Age:</Text>
                         <TextInput 
@@ -253,13 +265,9 @@ export default function App() {
                           keyboardType='numeric'
                         />
                       </View>
-            
                       <View style={styles.radioContainer}>
                         <Text style={styles.radioText}>Sex:</Text>
-                        <RadioButton.Group
-                          onValueChange={newSex => setSex(newSex)}
-                          value={sex}
-                        >
+                        <RadioButton.Group onValueChange={newSex => setSex(newSex)} value={sex} >
                           <View style={styles.radioButtonContainer}>
                             <RadioButton.Item label="Male" value="M" labelStyle={styles.radioButtonLabel} />
                             <RadioButton.Item label="Female" value="F" labelStyle={styles.radioButtonLabel} />
@@ -286,6 +294,7 @@ export default function App() {
   );
 }
 
+// styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -319,8 +328,12 @@ const styles = StyleSheet.create({
   scrollViewRow: {
     maxHeight: 300,
   },
+  notFoundText: {
+    color: 'white', 
+    textAlign: 'center'
+  },
   inputContainer: {
-    marginTop: 50,
+    marginTop: 30,
     width: '80%',
     marginLeft: 'auto',
     marginRight: 'auto',
@@ -349,26 +362,30 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
+    fontSize: 12,
   },
   radioContainer: {
-    borderWidth: 1,
-    borderColor: 'white',
     width: '100%',
   },
   radioText: {
     fontSize: 18,
     color: 'white',
-    marginLeft: 10,
     marginTop: 5,
   },
   radioButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,           
+    borderColor: 'white',     
+    borderRadius: 8, 
+    padding: 3,   
+    marginTop: 10,
+    marginBottom: 10,  
   },
   radioButtonLabel: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 11,
   },  
 
   modalOverlay: {
@@ -381,7 +398,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#030d14',
     padding: 20,
     borderRadius: 10,
-    width: '80%',
+    width: '90%',
   },
   modalTitle: {
     fontSize: 20,
@@ -421,7 +438,7 @@ const styles = StyleSheet.create({
   },
   modalButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 13,
     textAlign: 'center',
   },
 });

@@ -1,8 +1,15 @@
+/**
+ * "StAuth10244: I Braeden Lyman, 000370695 certify that this material is my original work. 
+ *  No other person's work has been used without due acknowledgement. 
+ *  I have not made my work available to anyone else."
+ */
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const db = require('../backend/database');
 const app = express();
+
+app.use(cors({ origin: '*' }));
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -85,4 +92,4 @@ app.delete('/api/:id', (req, res) => {
     });
 });
 
-app.listen(3001, () => console.log('Server running on http://localhost:3001'));
+app.listen(3001, '0.0.0.0', () => console.log('Server running...'));
